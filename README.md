@@ -52,6 +52,7 @@ After launching the application, you will be greeted by the main menu:
    - Opens a list of available servers. You can join an existing server or create your own.
 
 ![image](https://github.com/user-attachments/assets/c165a6ed-e0fd-45fc-9cff-171935321e6f)
+
 After joining or creating a lobby, you can customize the appearance of your character.
 
 ![image](https://github.com/user-attachments/assets/4c5de0a6-d4bd-425f-a0c4-93b74d472fd6)
