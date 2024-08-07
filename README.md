@@ -40,10 +40,12 @@ Player interactions are processed locally and then synchronized with the server.
 ### Controlling the Game
 
 After launching the application, you will be greeted by the main menu:
+
 ![image](https://github.com/user-attachments/assets/3a45114b-6c19-4616-abed-f4ceeb4608fb)
 
 1. **Input Field for Game Name:**
    - Enter your game name here.
+   - 
 ![image](https://github.com/user-attachments/assets/3d4b05ba-bd80-4f04-a445-b3e2c93e5361)
 
 2. **Server List Button:**
@@ -51,6 +53,7 @@ After launching the application, you will be greeted by the main menu:
 
 ![image](https://github.com/user-attachments/assets/c165a6ed-e0fd-45fc-9cff-171935321e6f)
 After joining or creating a lobby, you can customize the appearance of your character.
+
 ![image](https://github.com/user-attachments/assets/4c5de0a6-d4bd-425f-a0c4-93b74d472fd6)
 
 ### Player Controls
