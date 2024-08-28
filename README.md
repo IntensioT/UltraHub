@@ -43,9 +43,9 @@ After launching the application, you will be greeted by the main menu:
 
 ![image](https://github.com/user-attachments/assets/3a45114b-6c19-4616-abed-f4ceeb4608fb)
 
-1. **Input Field for Game Name:**
-   - Enter your game name here.
-   - 
+1. **Input Field for Server Name:**
+   - Enter your server name here.
+
 ![image](https://github.com/user-attachments/assets/3d4b05ba-bd80-4f04-a445-b3e2c93e5361)
 
 2. **Server List Button:**
