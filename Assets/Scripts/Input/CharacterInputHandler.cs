@@ -61,6 +61,12 @@ public class CharacterInputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G))
             isGrenadeFireButtonPressed = true;
 
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            //switch var on my local version of networkPlayer
+            NetworkPlayer.Local.isThirdPersonCamera = !NetworkPlayer.Local.isThirdPersonCamera; 
+        }
+
         //Set view
         localCameraHandler.SetViewInputVector(viewInputVector);
 

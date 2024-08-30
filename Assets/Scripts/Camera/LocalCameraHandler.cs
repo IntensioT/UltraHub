@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class LocalCameraHandler : MonoBehaviour
 {
     public Transform cameraAnchorPoint;
-
+    public Camera localCamera;
+    public GameObject localGun;
     //Input
     Vector2 viewInput;
 
@@ -15,7 +17,7 @@ public class LocalCameraHandler : MonoBehaviour
 
     //Other components
     NetworkCharacterControllerPrototypeCustom networkCharacterControllerPrototypeCustom;
-    public Camera localCamera;
+    CinemachineVirtualCamera cinemachineVirtualCamera;
 
     private void Awake()
     {
@@ -37,6 +39,40 @@ public class LocalCameraHandler : MonoBehaviour
 
         if (!localCamera.enabled)
             return;
+
+        // Find the Cinemachine camera if haven't already
+        if (cinemachineVirtualCamera == null)
+            cinemachineVirtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        else
+        {
+            if (NetworkPlayer.Local.isThirdPersonCamera)
+            {
+                if (!cinemachineVirtualCamera.enabled)
+                {
+                    cinemachineVirtualCamera.Follow = NetworkPlayer.Local.playerModel;
+                    cinemachineVirtualCamera.LookAt = NetworkPlayer.Local.playerModel;
+                    cinemachineVirtualCamera.enabled = true;
+
+                    //Set the layer of the local players model
+                    Utils.SetRenderLayerInChildren(NetworkPlayer.Local.playerModel, LayerMask.NameToLayer("Default"));
+
+                    localGun.SetActive(false);
+                }
+                return;
+            }
+            else
+            {
+                if ((cinemachineVirtualCamera.enabled))
+                {
+                    cinemachineVirtualCamera.enabled = false;
+
+                    //Set the layer of the local players model
+                    Utils.SetRenderLayerInChildren(NetworkPlayer.Local.playerModel, LayerMask.NameToLayer("LocalPlayerModel"));
+
+                    localGun.SetActive(true);
+                }
+            }
+        }
 
         //Move the camera to the position of the player
         localCamera.transform.position = cameraAnchorPoint.position;

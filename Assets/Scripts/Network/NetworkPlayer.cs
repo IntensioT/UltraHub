@@ -22,6 +22,9 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
     public LocalCameraHandler localCameraHandler;
     public GameObject localUI;
 
+    // Camera mode
+    public bool isThirdPersonCamera {get; set; }
+
     //Other components
     NetworkInGameMessages networkInGameMessages;
 
