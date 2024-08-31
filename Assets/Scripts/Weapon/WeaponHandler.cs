@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
+using System.Runtime.InteropServices;
 
 public class WeaponHandler : NetworkBehaviour
 {
@@ -93,25 +94,26 @@ public class WeaponHandler : NetworkBehaviour
         fireDirection = aimForwardVector;
         float hitDistance = maxHitDistance;
 
+        LagCompensatedHit hitinfo;
+
         //Get a raycast from third peerson camera 
         if (networkPlayer.isThirdPersonCamera)
         {
-            Runner.LagCompensation.Raycast(cameraPosition, fireDirection, hitDistance, Object.InputAuthority, out var hitinfoThird, collisionLayers, HitOptions.IgnoreInputAuthority | HitOptions.IncludePhysX);
+            Runner.LagCompensation.Raycast(cameraPosition, fireDirection, hitDistance, Object.InputAuthority, out hitinfo, collisionLayers, HitOptions.IgnoreInputAuthority | HitOptions.IncludePhysX);
 
             //check against other players 
-            if (hitinfoThird.Hitbox != null)
+            if (hitinfo.Hitbox != null)
             {
-                fireDirection = (hitinfoThird.Point - aimPoint.position).normalized;
-                hitDistance = hitinfoThird.Distance;
-
                 Debug.DrawRay(cameraPosition, fireDirection * hitDistance, new Color(0.4f, 0, 0), 1f);
 
+                fireDirection = (hitinfo.Point - aimPoint.position).normalized;
+                hitDistance = hitinfo.Distance;
             }
             //Check against physX colliders if didn't hit player 
-            else if (hitinfoThird.Collider != null)
+            else if (hitinfo.Collider != null)
             {
-                fireDirection = (hitinfoThird.Point - aimPoint.position).normalized;
-                hitDistance = hitinfoThird.Distance;
+                fireDirection = (hitinfo.Point - aimPoint.position).normalized;
+                hitDistance = hitinfo.Distance;
 
                 Debug.DrawRay(cameraPosition, fireDirection * hitDistance, new Color(0, 0.4f, 0), 1f);
 
@@ -120,14 +122,14 @@ public class WeaponHandler : NetworkBehaviour
             {
                 fireDirection = ((cameraPosition + fireDirection * hitDistance) - aimPoint.position).normalized;
 
-                Debug.DrawRay(cameraPosition, fireDirection * hitDistance, Color.gray, 1f);
+                Debug.DrawRay(cameraPosition, fireDirection * hitDistance, new Color(0, 0, 0.4f), 1f);
             }
         }
 
         //reset hit distance
         hitDistance = maxHitDistance;
 
-        Runner.LagCompensation.Raycast(aimPoint.position, fireDirection, maxHitDistance, Object.InputAuthority, out var hitinfo, collisionLayers, HitOptions.IgnoreInputAuthority | HitOptions.IncludePhysX);
+        Runner.LagCompensation.Raycast(aimPoint.position, fireDirection, maxHitDistance, Object.InputAuthority, out hitinfo, collisionLayers, HitOptions.IgnoreInputAuthority | HitOptions.IncludePhysX);
 
         //Check against other players 
         if (hitinfo.Hitbox != null)
@@ -135,7 +137,7 @@ public class WeaponHandler : NetworkBehaviour
             hitDistance = hitinfo.Distance;
             HPHandler hitHpHandler = null;
 
-            if (Object.StateAuthority)
+            if (Object.HasStateAuthority)
             {
                 hitHpHandler = hitinfo.Hitbox.transform.root.GetComponent<HPHandler>();
                 Debug.DrawRay(aimPoint.position, fireDirection * hitDistance, Color.red, 1f);
@@ -149,12 +151,12 @@ public class WeaponHandler : NetworkBehaviour
             hitDistance = hitinfo.Distance;
 
             // Draw ray for collider
-            Debug.DrawRay(aimPoint.position, fireDirection * hitDistance, Color.blue, 1f);
+            Debug.DrawRay(aimPoint.position, fireDirection * hitDistance, Color.green, 1f);
         }
         else
         {
             // Draw ray for no hit
-            Debug.DrawRay(aimPoint.position, fireDirection * maxHitDistance, Color.yellow, 1f);
+            Debug.DrawRay(aimPoint.position, fireDirection * maxHitDistance, Color.blue, 1f);
         }
 
         return null;
@@ -182,7 +184,7 @@ public class WeaponHandler : NetworkBehaviour
         {
             CalculateFireDirection(aimForwardVector, cameraPosition, out Vector3 fireDirection);
 
-            Runner.Spawn(rocketPrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedRocket) =>
+            Runner.Spawn(rocketPrefab, aimPoint.position + fireDirection * 1.5f, Quaternion.LookRotation(fireDirection), Object.InputAuthority, (runner, spawnedRocket) =>
             {
                 spawnedRocket.GetComponent<RocketHandler>().Fire(Object.InputAuthority, networkObject, networkPlayer.nickName.ToString());
             });

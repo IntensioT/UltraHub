@@ -526,7 +526,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2068390590835243674}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
   m_LocalPosition: {x: -3.5440068, y: -1.3728204, z: 30.992374}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1259,7 +1259,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
   InterpolationSpace: 0
-  InterpolationTarget: {fileID: 8054853945983303956}
+  InterpolationTarget: {fileID: 0}
   InterpolateErrorCorrection: 1
   InterpolatedErrorCorrectionSettings:
     MinRate: 3.3
@@ -1278,7 +1278,7 @@ MonoBehaviour:
   acceleration: 50
   braking: 30
   maxSpeed: 6
-  rotationSpeed: 80
+  rotationSpeed: 150
   viewUpDownRotationSpeed: 60
   _IsGrounded: 0
   _Velocity: {x: 0, y: 0, z: 0}
