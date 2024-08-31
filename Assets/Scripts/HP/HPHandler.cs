@@ -6,10 +6,10 @@ using UnityEngine.UI;
 
 public class HPHandler : NetworkBehaviour
 {
-    [Networked(OnChanged = nameof(OnHPChanged))]
+    [Networked]
     byte HP { get; set; }
 
-    [Networked(OnChanged = nameof(OnStateChanged))]
+    [Networked]
     public bool isDead { get; set; }
 
     bool isInitialized = false;
@@ -25,6 +25,8 @@ public class HPHandler : NetworkBehaviour
     public GameObject deathGameObjectPrefab;
 
     public bool skipSettingStartValues = false;
+
+    ChangeDetector changeDetector;
 
     //Other components
     HitboxRoot hitboxRoot;
@@ -52,6 +54,26 @@ public class HPHandler : NetworkBehaviour
         ResetMeshRenderers();
 
         isInitialized = true;
+    }
+
+    public override void Render()
+    {
+        foreach (var change in changeDetector.DetectChanges(this, out var previousBuffer, out var currentBuffer))
+        {
+            switch (change)
+            {
+                case nameof(HP):
+                    var byteReader = GetPropertyReader<byte>(nameof(HP));
+                    var (previousByte, currentByte) = byteReader.Read(previousBuffer, currentBuffer);
+                    OnHPChanged(previousByte, currentByte);
+                    break;
+                case nameof(isDead):
+                    var boolReader = GetPropertyReader<bool>(nameof(isDead));
+                    var (previousBool, currentBool) = boolReader.Read(previousBuffer, currentBuffer);
+                    OnStateChanged(previousBool, currentBool);
+                    break;
+            }
+        }
     }
 
     public void ResetMeshRenderers()
@@ -122,20 +144,11 @@ public class HPHandler : NetworkBehaviour
         }
     }
 
-    static void OnHPChanged(Changed<HPHandler> changed)
+    void OnHPChanged(byte previous, byte current)
     {
-        Debug.Log($"{Time.time} OnHPChanged value {changed.Behaviour.HP}");
-
-        byte newHP = changed.Behaviour.HP;
-
-        //Load the old value
-        changed.LoadOld();
-
-        byte oldHP = changed.Behaviour.HP;
-
         //Check if the HP has been decreased
-        if (newHP < oldHP)
-            changed.Behaviour.OnHPReduced();
+        if (current < previous)
+            OnHPReduced();
     }
 
     private void OnHPReduced()
@@ -146,22 +159,13 @@ public class HPHandler : NetworkBehaviour
         StartCoroutine(OnHitCO());
     }
 
-    static void OnStateChanged(Changed<HPHandler> changed)
+    void OnStateChanged(bool previous, bool current)
     {
-        Debug.Log($"{Time.time} OnStateChanged isDead {changed.Behaviour.isDead}");
-
-        bool isDeadCurrent = changed.Behaviour.isDead;
-
-        //Load the old value
-        changed.LoadOld();
-
-        bool isDeadOld = changed.Behaviour.isDead;
-
         //Handle on death for the player. Also check if the player was dead but is now alive in that case revive the player.
-        if (isDeadCurrent)
-            changed.Behaviour.OnDeath();
-        else if (!isDeadCurrent && isDeadOld)
-            changed.Behaviour.OnRevive();
+        if (current)
+            OnDeath();
+        else if (!current && previous)
+            OnRevive();
     }
 
     private void OnDeath()
@@ -192,5 +196,10 @@ public class HPHandler : NetworkBehaviour
         //Reset variables
         HP = startingHP;
         isDead = false;
+    }
+
+    public override void Spawned()
+    {
+        changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
     }
 }

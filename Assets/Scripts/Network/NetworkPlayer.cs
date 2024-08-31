@@ -11,11 +11,13 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
     public static NetworkPlayer Local { get; set; }
     public Transform playerModel;
 
-    [Networked(OnChanged = nameof(OnNickNameChanged))]
+    [Networked]
     public NetworkString<_16> nickName { get; set; }
 
     // Remote Client Token Hash
     [Networked] public int token { get; set; }
+
+    ChangeDetector changeDetector;
 
     bool isPublicJoinMessageSent = false;
 
@@ -39,8 +41,23 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 
     }
 
+    public override void Render()
+    {
+        foreach (var change in changeDetector.DetectChanges(this, out var previousBuffer, out var currentBuffer))
+        {
+            switch (change)
+            {
+                case nameof(nickName):
+                    OnNickNameChanged();
+                    break;
+            }
+        }
+    }
+
     public override void Spawned()
     {
+        changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
+
         bool isReadyScene = SceneManager.GetActiveScene().name == "Ready";
 
         if (Object.HasInputAuthority)
@@ -126,12 +143,6 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
         if (player == Object.InputAuthority)
             Runner.Despawn(Object);
 
-    }
-    static void OnNickNameChanged(Changed<NetworkPlayer> changed)
-    {
-        Debug.Log($"{Time.time} OnHPChanged value {changed.Behaviour.nickName}");
-
-        changed.Behaviour.OnNickNameChanged();
     }
 
     private void OnNickNameChanged()

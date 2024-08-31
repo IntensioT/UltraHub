@@ -34,11 +34,13 @@ public class CharacterOutfitHandler : NetworkBehaviour
         public byte rightArmPrefabID;
     }
 
-    [Networked(OnChanged = nameof(OnOutfitChanged))]
+    [Networked]
     NetworkOutfit networkOutfit { get; set; }
 
-    [Networked(OnChanged = nameof(OnIsDoneWithCharacterSelectionChanged))]
+    [Networked]
     public NetworkBool isDoneWithCharacterSelection { get; set; }
+
+    ChangeDetector changeDetector;
 
     private void Awake()
     {
@@ -83,6 +85,22 @@ public class CharacterOutfitHandler : NetworkBehaviour
             RPC_RequestOutfitChange(newOutfit);
     }
 
+    public override void Render()
+    {
+        foreach (var change in changeDetector.DetectChanges(this, out var previousBuffer, out var currentBuffer))
+        {
+            switch (change)
+            {
+                case nameof(isDoneWithCharacterSelection):
+                    OnIsDoneWithCharacterSelectionChanged();
+                    break;
+                case nameof(networkOutfit):
+                    OnOutfitChanged();
+                    break;
+            }
+        }
+    }
+
     GameObject ReplaceBodyPart(GameObject currentBodyPart, GameObject prefabNewBodyPart)
     {
         GameObject newPart = Instantiate(prefabNewBodyPart, currentBodyPart.transform.position, currentBodyPart.transform.rotation);
@@ -116,12 +134,6 @@ public class CharacterOutfitHandler : NetworkBehaviour
         Debug.Log($"Received RPC_RequestOutfitChange for player {transform.name}. HeadID {newNetworkOutfit.headPrefabID}");
 
         networkOutfit = newNetworkOutfit;
-    }
-
-
-    static void OnOutfitChanged(Changed<CharacterOutfitHandler> changed)
-    {
-        changed.Behaviour.OnOutfitChanged();
     }
 
     private void OnOutfitChanged()
@@ -206,12 +218,7 @@ public class CharacterOutfitHandler : NetworkBehaviour
         isDoneWithCharacterSelection = isReady;
     }
 
-    static void OnIsDoneWithCharacterSelectionChanged(Changed<CharacterOutfitHandler> changed)
-    {
-        changed.Behaviour.IsDoneWithCharacterSelectionChanged();
-    }
-
-    private void IsDoneWithCharacterSelectionChanged()
+    private void OnIsDoneWithCharacterSelectionChanged()
     {
         if (SceneManager.GetActiveScene().name != "Ready")
             return;
@@ -238,5 +245,10 @@ public class CharacterOutfitHandler : NetworkBehaviour
     {
         if (scene.name != "Ready")
             readyCheckboxImage.gameObject.SetActive(false);
+    }
+
+    public override void Spawned()
+    {
+        changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
     }
 }

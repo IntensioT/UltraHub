@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
+using Fusion.Addons.Physics;
 
 public class GrenadeHandler : NetworkBehaviour
 {
@@ -23,12 +24,12 @@ public class GrenadeHandler : NetworkBehaviour
 
     //Other components
     NetworkObject networkObject;
-    NetworkRigidbody networkRigidbody;
+    NetworkRigidbody3D networkRigidbody;
 
     public void Throw(Vector3 throwForce, PlayerRef thrownByPlayerRef, string thrownByPlayerName)
     {
         networkObject = GetComponent<NetworkObject>();
-        networkRigidbody = GetComponent<NetworkRigidbody>();
+        networkRigidbody = GetComponent<NetworkRigidbody3D>();
 
         networkRigidbody.Rigidbody.AddForce(throwForce, ForceMode.Impulse);
 

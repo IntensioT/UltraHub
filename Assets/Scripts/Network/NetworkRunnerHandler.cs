@@ -35,7 +35,7 @@ public class NetworkRunnerHandler : MonoBehaviour
 
             if (SceneManager.GetActiveScene().name != "MainMenu")
             {
-                var clientTask = InitializeNetworkRunner(networkRunner, GameMode.AutoHostOrClient, "TestSession", GameManager.instance.GetConnectionToken(), NetAddress.Any(), SceneManager.GetActiveScene().buildIndex, null);
+                var clientTask = InitializeNetworkRunner(networkRunner, GameMode.AutoHostOrClient, "TestSession", GameManager.instance.GetConnectionToken(), NetAddress.Any(), SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex), null);
             }
 
             Debug.Log($"Server NetworkRunner started.");
@@ -79,7 +79,6 @@ public class NetworkRunnerHandler : MonoBehaviour
             Scene = scene,
             SessionName = sessionName,
             CustomLobbyName = "OurLobbyID",
-            Initialized = initialized,
             SceneManager = sceneManager,
             ConnectionToken = connectionToken
         });
@@ -112,10 +111,10 @@ public class NetworkRunnerHandler : MonoBehaviour
         // Get a reference for each Network object from the old Host
         foreach (var resumeNetworkObject in runner.GetResumeSnapshotNetworkObjects())
         {
-            // Grab all the player objects, they have a NetworkCharacterControllerPrototypeCustom
-            if (resumeNetworkObject.TryGetBehaviour<NetworkCharacterControllerPrototypeCustom>(out var characterController))
+            // Grab all the player objects, they have a NetworkCharacterController
+            if (resumeNetworkObject.TryGetBehaviour<NetworkCharacterController>(out var characterController))
             {
-                runner.Spawn(resumeNetworkObject, position: characterController.ReadPosition(), rotation: characterController.ReadRotation(), onBeforeSpawned: (runner, newNetworkObject) =>
+                runner.Spawn(resumeNetworkObject, position: characterController.transform.position, rotation: characterController.transform.rotation, onBeforeSpawned: (runner, newNetworkObject) =>
                 {
                     newNetworkObject.CopyStateFrom(resumeNetworkObject);
 
@@ -142,7 +141,7 @@ public class NetworkRunnerHandler : MonoBehaviour
         StartCoroutine(CleanUpHostMigrationCO());
 
         //New host needs to ensure that it knows what scene is active. 
-        runner.SetActiveScene(SceneManager.GetActiveScene().buildIndex);
+        runner.LoadScene(SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex));
 
         Debug.Log($"HostMigrationResume completed");
     }
@@ -181,7 +180,7 @@ public class NetworkRunnerHandler : MonoBehaviour
         Debug.Log($"Create session {sessionName} scene {sceneName} build Index {SceneUtility.GetBuildIndexByScenePath($"scenes/{sceneName}")}");
 
         //Join existing game as a client
-        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, GameManager.instance.GetConnectionToken(), NetAddress.Any(), SceneUtility.GetBuildIndexByScenePath($"scenes/{sceneName}"), null);
+        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, GameManager.instance.GetConnectionToken(), NetAddress.Any(), SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"scenes/{sceneName}")), null);
 
     }
 
@@ -190,7 +189,7 @@ public class NetworkRunnerHandler : MonoBehaviour
         Debug.Log($"Join session {sessionInfo.Name}");
 
         //Join existing game as a client
-        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Client, sessionInfo.Name, GameManager.instance.GetConnectionToken(), NetAddress.Any(), SceneManager.GetActiveScene().buildIndex, null);
+        var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Client, sessionInfo.Name, GameManager.instance.GetConnectionToken(), NetAddress.Any(), SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex), null);
 
     }
 

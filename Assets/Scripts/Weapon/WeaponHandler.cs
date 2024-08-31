@@ -21,9 +21,10 @@ public class WeaponHandler : NetworkBehaviour
     public LayerMask collisionLayers;
 
 
-    [Networked(OnChanged = nameof(OnFireChanged))]
+    [Networked]
     public bool isFiring { get; set; }
 
+    ChangeDetector changeDetector;
 
 
 
@@ -70,6 +71,21 @@ public class WeaponHandler : NetworkBehaviour
 
             if (networkInputData.isRocketLauncherFireButtonPressed)
                 FireRocket(networkInputData.aimForwardVector, networkInputData.cameraPosition);
+        }
+    }
+
+    public override void Render()
+    {
+        foreach (var change in changeDetector.DetectChanges(this, out var previousBuffer, out var currentBuffer))
+        {
+            switch (change)
+            {
+                case nameof(isFiring):
+                    var boolReader = GetPropertyReader<bool>(nameof(isFiring));
+                    var (previousBool, currentBool) = boolReader.Read(previousBuffer, currentBuffer);
+                    OnFireChanged(previousBool, currentBool);
+                    break;
+            }
         }
     }
 
@@ -163,19 +179,86 @@ public class WeaponHandler : NetworkBehaviour
     }
 
     void FireGrenade(Vector3 aimForwardVector)
+{
+    // Проверка параметра
+    if (aimForwardVector == null)
     {
-        //Check that we have not recently fired a grenade. 
-        if (grenadeFireDelay.ExpiredOrNotRunning(Runner))
-        {
-            Runner.Spawn(grenadePrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedGrenade) =>
-            {
-                spawnedGrenade.GetComponent<GrenadeHandler>().Throw(aimForwardVector * 15, Object.InputAuthority, networkPlayer.nickName.ToString());
-            });
-
-            //Start a new timer to avoid grenade spamming
-            grenadeFireDelay = TickTimer.CreateFromSeconds(Runner, 1.0f);
-        }
+        Debug.LogError("aimForwardVector is null.");
+        return;
     }
+
+    // Проверка других объектов, которые могут быть null
+    if (grenadePrefab == null)
+    {
+        Debug.LogError("grenadePrefab is null.");
+        return;
+    }
+
+    if (aimPoint == null)
+    {
+        Debug.LogError("aimPoint is null.");
+        return;
+    }
+
+    if (Object.InputAuthority == null)
+    {
+        Debug.LogError("Object.InputAuthority is null.");
+        return;
+    }
+
+    if (networkPlayer == null)
+    {
+        Debug.LogError("networkPlayer is null.");
+        return;
+    }
+
+    if (Runner == null)
+    {
+        Debug.LogError("Runner is null.");
+        return;
+    }
+
+    // Check that we have not recently fired a grenade.
+    if (grenadeFireDelay.ExpiredOrNotRunning(Runner))
+    {
+        Runner.Spawn(grenadePrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedGrenade) =>
+        {
+            if (spawnedGrenade == null)
+            {
+                Debug.LogError("spawnedGrenade is null.");
+                return;
+            }
+
+            var grenadeHandler = spawnedGrenade.GetComponent<GrenadeHandler>();
+            if (grenadeHandler == null)
+            {
+                Debug.LogError("GrenadeHandler component is missing on spawnedGrenade.");
+                return;
+            }
+
+            grenadeHandler.Throw(aimForwardVector * 15, Object.InputAuthority, networkPlayer.nickName.ToString());
+        });
+
+        // Start a new timer to avoid grenade spamming
+        grenadeFireDelay = TickTimer.CreateFromSeconds(Runner, 1.0f);
+    }
+}
+
+
+    // void FireGrenade(Vector3 aimForwardVector)
+    // {
+    //     //Check that we have not recently fired a grenade. 
+    //     if (grenadeFireDelay.ExpiredOrNotRunning(Runner))
+    //     {
+    //         Runner.Spawn(grenadePrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedGrenade) =>
+    //         {
+    //             spawnedGrenade.GetComponent<GrenadeHandler>().Throw(aimForwardVector * 15, Object.InputAuthority, networkPlayer.nickName.ToString());
+    //         });
+
+    //         //Start a new timer to avoid grenade spamming
+    //         grenadeFireDelay = TickTimer.CreateFromSeconds(Runner, 1.0f);
+    //     }
+    // }
 
     void FireRocket(Vector3 aimForwardVector, Vector3 cameraPosition)
     {
@@ -208,19 +291,12 @@ public class WeaponHandler : NetworkBehaviour
     }
 
 
-    static void OnFireChanged(Changed<WeaponHandler> changed)
+    void OnFireChanged(bool previous, bool current)
     {
-        //Debug.Log($"{Time.time} OnFireChanged value {changed.Behaviour.isFiring}");
-
-        bool isFiringCurrent = changed.Behaviour.isFiring;
-
-        //Load the old value
-        changed.LoadOld();
-
-        bool isFiringOld = changed.Behaviour.isFiring;
-
-        if (isFiringCurrent && !isFiringOld)
-            changed.Behaviour.OnFireRemote();
+        if (current && !previous)
+        {
+            OnFireRemote();
+        }
 
     }
 
@@ -228,5 +304,10 @@ public class WeaponHandler : NetworkBehaviour
     {
         if (!Object.HasInputAuthority)
             fireParticleSystemRemotePlayer.Play();
+    }
+
+    public override void Spawned()
+    {
+        changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
     }
 }

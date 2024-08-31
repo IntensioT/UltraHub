@@ -2,7 +2,7 @@
 
 ## Overview
 
-UltraHub is a 3D multiplayer game developed using Unity. The game allows players to join or create servers, customize their characters, and interact with other players in a dynamic and engaging environment. This README file provides an overview of the project structure, functionality, and user manual.
+UltraHub is a 3D multiplayer game developed using Unity. The game allows players to join or create servers, customize their characters, and interact with other players in a dynamic and engaging environment.
 
 ## Functionality Design
 

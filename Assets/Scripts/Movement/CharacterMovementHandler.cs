@@ -14,14 +14,14 @@ public class CharacterMovementHandler : NetworkBehaviour
     float walkSpeed = 0;
 
     //Other components
-    NetworkCharacterControllerPrototypeCustom networkCharacterControllerPrototypeCustom;
+    NetworkCharacterController networkCharacterController;
     HPHandler hpHandler;
     NetworkInGameMessages networkInGameMessages;
     NetworkPlayer networkPlayer;
 
     private void Awake()
     {
-        networkCharacterControllerPrototypeCustom = GetComponent<NetworkCharacterControllerPrototypeCustom>();
+        networkCharacterController = GetComponent<NetworkCharacterController>();
         hpHandler = GetComponent<HPHandler>();
         networkInGameMessages = GetComponent<NetworkInGameMessages>();
         networkPlayer = GetComponent<NetworkPlayer>();
@@ -66,13 +66,13 @@ public class CharacterMovementHandler : NetworkBehaviour
             Vector3 moveDirection = transform.forward * networkInputData.movementInput.y + transform.right * networkInputData.movementInput.x;
             moveDirection.Normalize();
 
-            networkCharacterControllerPrototypeCustom.Move(moveDirection);
+            networkCharacterController.Move(moveDirection);
 
             //Jump
             if (networkInputData.isJumpPressed)
-                networkCharacterControllerPrototypeCustom.Jump();
+                networkCharacterController.Jump();
 
-            Vector2 walkVector = new Vector2(networkCharacterControllerPrototypeCustom.Velocity.x, networkCharacterControllerPrototypeCustom.Velocity.z);
+            Vector2 walkVector = new Vector2(networkCharacterController.Velocity.x, networkCharacterController.Velocity.z);
             walkVector.Normalize();
 
             walkSpeed = Mathf.Lerp(walkSpeed, Mathf.Clamp01(walkVector.magnitude), Runner.DeltaTime * 5);
@@ -109,7 +109,8 @@ public class CharacterMovementHandler : NetworkBehaviour
 
     void Respawn()
     {
-        networkCharacterControllerPrototypeCustom.TeleportToPosition(Utils.GetRandomSpawnPoint());
+        SetCharacterControllerEnabled(true);
+        networkCharacterController.Teleport(Utils.GetRandomSpawnPoint());
 
         hpHandler.OnRespawned();
 
@@ -118,7 +119,12 @@ public class CharacterMovementHandler : NetworkBehaviour
 
     public void SetCharacterControllerEnabled(bool isEnabled)
     {
-        networkCharacterControllerPrototypeCustom.Controller.enabled = isEnabled;
+        networkCharacterController.enabled = isEnabled;
     }
 
+    public override void Spawned()
+    {
+        if (Object.HasStateAuthority)
+            networkCharacterController.Teleport(Utils.GetRandomSpawnPoint());
+    }
 }

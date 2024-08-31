@@ -1,6 +1,7 @@
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,8 +20,10 @@ public class ReadyUIHandler : NetworkBehaviour
     //Count down
     TickTimer countDownTickTimer = TickTimer.None;
 
-    [Networked(OnChanged = nameof(OnCountdownChanged))]
+    [Networked]
     byte countDown { get; set; }
+
+    ChangeDetector changeDetector;
 
     // Start is called before the first frame update
     void Start()
@@ -62,6 +65,19 @@ public class ReadyUIHandler : NetworkBehaviour
         }
     }
 
+    public override void Render()
+    {
+        foreach (var change in changeDetector.DetectChanges(this, out var previousBuffer, out var currentBuffer))
+        {
+            switch (change)
+            {
+                case nameof(countDown):
+                    OnCountdownChanged();
+                    break;
+            }
+        }
+    }
+
     void StartGame()
     {
         //Lock the session, so no other client can join
@@ -80,7 +96,7 @@ public class ReadyUIHandler : NetworkBehaviour
         }
 
         //Update scene for the network
-        Runner.SetActiveScene("World1");
+        Runner.LoadScene("World1");
     }
 
     public void OnChangeCharcterHead()
@@ -141,15 +157,15 @@ public class ReadyUIHandler : NetworkBehaviour
         NetworkPlayer.Local.GetComponent<CharacterOutfitHandler>().OnReady(isReady);
     }
 
-    static void OnCountdownChanged(Changed<ReadyUIHandler> changed)
-    {
-        changed.Behaviour.OnCountdownChanged();
-    }
-
     private void OnCountdownChanged()
     {
         if (countDown == 0)
             countDownText.text = $"";
         else countDownText.text = $"Game starts in {countDown}";
+    }
+
+    public override void Spawned()
+    {
+        changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
     }
 }
