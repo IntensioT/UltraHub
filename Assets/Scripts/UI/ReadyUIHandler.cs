@@ -30,6 +30,11 @@ public class ReadyUIHandler : NetworkBehaviour
 
     void Update()
     {
+        //Wait until the player spawned and NetworkPlayer.local is populated
+        if (NetworkPlayer.Local == null)
+            return;
+
+
         float lerpSpeed = 0.5f;
 
         if (!isReady)

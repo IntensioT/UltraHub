@@ -24,7 +24,12 @@ public class WeaponHandler : NetworkBehaviour
     public bool isFiring { get; set; }
 
 
+
+
     float lastTimeFired = 0;
+    float maxHitDistance = 200;
+
+
 
     //Timing
     TickTimer grenadeFireDelay = TickTimer.None;
@@ -45,7 +50,7 @@ public class WeaponHandler : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     public override void FixedUpdateNetwork()
@@ -57,17 +62,17 @@ public class WeaponHandler : NetworkBehaviour
         if (GetInput(out NetworkInputData networkInputData))
         {
             if (networkInputData.isFireButtonPressed)
-                Fire(networkInputData.aimForwardVector);
+                Fire(networkInputData.aimForwardVector, networkInputData.cameraPosition);
 
             if (networkInputData.isGrenadeFireButtonPressed)
                 FireGrenade(networkInputData.aimForwardVector);
 
             if (networkInputData.isRocketLauncherFireButtonPressed)
-                FireRocket(networkInputData.aimForwardVector);
+                FireRocket(networkInputData.aimForwardVector, networkInputData.cameraPosition);
         }
     }
 
-    void Fire(Vector3 aimForwardVector)
+    void Fire(Vector3 aimForwardVector, Vector3 cameraPosition)
     {
         //Limit fire rate
         if (Time.time - lastTimeFired < 0.15f)
@@ -75,35 +80,84 @@ public class WeaponHandler : NetworkBehaviour
 
         StartCoroutine(FireEffectCO());
 
-        Runner.LagCompensation.Raycast(aimPoint.position, aimForwardVector, 100, Object.InputAuthority, out var hitinfo, collisionLayers, HitOptions.IgnoreInputAuthority);
+        HPHandler hitHpHandler = CalculateFireDirection(aimForwardVector, cameraPosition, out Vector3 fireDirection);
 
-        float hitDistance = 100;
-        bool isHitOtherPlayer = false;
+        if (hitHpHandler != null && Object.HasStateAuthority)
+            hitHpHandler.OnTakeDamage(networkPlayer.nickName.ToString(), 1);
 
-        if (hitinfo.Distance > 0)
-            hitDistance = hitinfo.Distance;
+        lastTimeFired = Time.time;
+    }
 
+    HPHandler CalculateFireDirection(Vector3 aimForwardVector, Vector3 cameraPosition, out Vector3 fireDirection)
+    {
+        fireDirection = aimForwardVector;
+        float hitDistance = maxHitDistance;
+
+        //Get a raycast from third peerson camera 
+        if (networkPlayer.isThirdPersonCamera)
+        {
+            Runner.LagCompensation.Raycast(cameraPosition, fireDirection, hitDistance, Object.InputAuthority, out var hitinfoThird, collisionLayers, HitOptions.IgnoreInputAuthority | HitOptions.IncludePhysX);
+
+            //check against other players 
+            if (hitinfoThird.Hitbox != null)
+            {
+                fireDirection = (hitinfoThird.Point - aimPoint.position).normalized;
+                hitDistance = hitinfoThird.Distance;
+
+                Debug.DrawRay(cameraPosition, fireDirection * hitDistance, new Color(0.4f, 0, 0), 1f);
+
+            }
+            //Check against physX colliders if didn't hit player 
+            else if (hitinfoThird.Collider != null)
+            {
+                fireDirection = (hitinfoThird.Point - aimPoint.position).normalized;
+                hitDistance = hitinfoThird.Distance;
+
+                Debug.DrawRay(cameraPosition, fireDirection * hitDistance, new Color(0, 0.4f, 0), 1f);
+
+            }
+            else
+            {
+                fireDirection = ((cameraPosition + fireDirection * hitDistance) - aimPoint.position).normalized;
+
+                Debug.DrawRay(cameraPosition, fireDirection * hitDistance, Color.gray, 1f);
+            }
+        }
+
+        //reset hit distance
+        hitDistance = maxHitDistance;
+
+        Runner.LagCompensation.Raycast(aimPoint.position, fireDirection, maxHitDistance, Object.InputAuthority, out var hitinfo, collisionLayers, HitOptions.IgnoreInputAuthority | HitOptions.IncludePhysX);
+
+        //Check against other players 
         if (hitinfo.Hitbox != null)
         {
-            Debug.Log($"{Time.time} {transform.name} hit hitbox {hitinfo.Hitbox.transform.root.name}");
+            hitDistance = hitinfo.Distance;
+            HPHandler hitHpHandler = null;
 
-            if (Object.HasStateAuthority)
-                hitinfo.Hitbox.transform.root.GetComponent<HPHandler>().OnTakeDamage(networkPlayer.nickName.ToString(), 1);
+            if (Object.StateAuthority)
+            {
+                hitHpHandler = hitinfo.Hitbox.transform.root.GetComponent<HPHandler>();
+                Debug.DrawRay(aimPoint.position, fireDirection * hitDistance, Color.red, 1f);
 
-            isHitOtherPlayer = true;
+                return hitHpHandler;
+            }
 
         }
         else if (hitinfo.Collider != null)
         {
-            Debug.Log($"{Time.time} {transform.name} hit PhysX collider {hitinfo.Collider.transform.name}");
+            hitDistance = hitinfo.Distance;
+
+            // Draw ray for collider
+            Debug.DrawRay(aimPoint.position, fireDirection * hitDistance, Color.blue, 1f);
+        }
+        else
+        {
+            // Draw ray for no hit
+            Debug.DrawRay(aimPoint.position, fireDirection * maxHitDistance, Color.yellow, 1f);
         }
 
-        //Debug
-        if (isHitOtherPlayer)
-            Debug.DrawRay(aimPoint.position, aimForwardVector * hitDistance, Color.red, 1);
-        else Debug.DrawRay(aimPoint.position, aimForwardVector * hitDistance, Color.green, 1);
-
-        lastTimeFired = Time.time;
+        return null;
     }
 
     void FireGrenade(Vector3 aimForwardVector)
@@ -121,14 +175,16 @@ public class WeaponHandler : NetworkBehaviour
         }
     }
 
-    void FireRocket(Vector3 aimForwardVector)
+    void FireRocket(Vector3 aimForwardVector, Vector3 cameraPosition)
     {
         //Check that we have not recently fired a grenade. 
         if (rocketFireDelay.ExpiredOrNotRunning(Runner))
         {
+            CalculateFireDirection(aimForwardVector, cameraPosition, out Vector3 fireDirection);
+
             Runner.Spawn(rocketPrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedRocket) =>
             {
-                spawnedRocket.GetComponent<RocketHandler>().Fire(Object.InputAuthority, networkObject,  networkPlayer.nickName.ToString());
+                spawnedRocket.GetComponent<RocketHandler>().Fire(Object.InputAuthority, networkObject, networkPlayer.nickName.ToString());
             });
 
             //Start a new timer to avoid grenade spamming
@@ -140,7 +196,9 @@ public class WeaponHandler : NetworkBehaviour
     {
         isFiring = true;
 
-        fireParticleSystem.Play();
+        if (networkPlayer.isThirdPersonCamera)
+            fireParticleSystemRemotePlayer.Play();
+        else fireParticleSystem.Play();
 
         yield return new WaitForSeconds(0.09f);
 

@@ -65,6 +65,9 @@ public class CharacterInputHandler : MonoBehaviour
         {
             //switch var on my local version of networkPlayer
             NetworkPlayer.Local.isThirdPersonCamera = !NetworkPlayer.Local.isThirdPersonCamera; 
+
+            //Tell the state authority which camera moode is using 
+            NetworkPlayer.Local.RPC_SetCameraMode(NetworkPlayer.Local.isThirdPersonCamera);
         }
 
         //Set view
@@ -78,6 +81,9 @@ public class CharacterInputHandler : MonoBehaviour
 
         //Aim data
         networkInputData.aimForwardVector = localCameraHandler.transform.forward;
+
+        //Camera position
+        networkInputData.cameraPosition = localCameraHandler.transform.position;
 
         //Move data
         networkInputData.movementInput = moveInputVector;

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
+using UnityEngine.SceneManagement;
 
 public class CharacterMovementHandler : NetworkBehaviour
 {
@@ -33,6 +34,10 @@ public class CharacterMovementHandler : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
+        if (SceneManager.GetActiveScene().name == "Ready")
+            return;
+
+
         if (Object.HasStateAuthority)
         {
             if (isRespawnRequested)
@@ -64,7 +69,7 @@ public class CharacterMovementHandler : NetworkBehaviour
             networkCharacterControllerPrototypeCustom.Move(moveDirection);
 
             //Jump
-            if(networkInputData.isJumpPressed)
+            if (networkInputData.isJumpPressed)
                 networkCharacterControllerPrototypeCustom.Jump();
 
             Vector2 walkVector = new Vector2(networkCharacterControllerPrototypeCustom.Velocity.x, networkCharacterControllerPrototypeCustom.Velocity.z);

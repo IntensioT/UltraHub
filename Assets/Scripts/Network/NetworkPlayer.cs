@@ -86,6 +86,9 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 
             RPC_SetNickName(GameManager.instance.playerNickName);
 
+            //Disable nickname for local player 
+            playerNickNameTM.gameObject.SetActive(false);
+
             Debug.Log("Spawned local player");
         }
         else
@@ -152,11 +155,21 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
         }
     }
 
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_SetCameraMode(bool isThirdPersonCamera, RpcInfo info = default)
+    {
+        Debug.Log($"[RPC] SetCameraMode. isThirdPersonCamera {isThirdPersonCamera}");
+
+        this.isThirdPersonCamera = isThirdPersonCamera;
+    }
+
     void OnDestroy()
     {
         //Get rid of the local camera if we get destroyed as a new one will be spawned with the new Network player
         if (localCameraHandler != null)
             Destroy(localCameraHandler.gameObject);
+
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     void OnEnable()

@@ -224,6 +224,11 @@ public class CharacterOutfitHandler : NetworkBehaviour
         else readyCheckboxImage.gameObject.SetActive(false);
     }
 
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
