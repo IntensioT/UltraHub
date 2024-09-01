@@ -178,87 +178,49 @@ public class WeaponHandler : NetworkBehaviour
         return null;
     }
 
+//     void FireGrenade(Vector3 aimForwardVector)
+// {
+//     // Check that we have not recently fired a grenade.
+//     if (grenadeFireDelay.ExpiredOrNotRunning(Runner))
+//     {
+//         Runner.Spawn(grenadePrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedGrenade) =>
+//         {
+//             if (spawnedGrenade == null)
+//             {
+//                 Debug.LogError("spawnedGrenade is null.");
+//                 return;
+//             }
+
+//             var grenadeHandler = spawnedGrenade.GetComponent<GrenadeHandler>();
+//             if (grenadeHandler == null)
+//             {
+//                 Debug.LogError("GrenadeHandler component is missing on spawnedGrenade.");
+//                 return;
+//             }
+
+//             grenadeHandler.Throw(aimForwardVector * 15, Object.InputAuthority, networkPlayer.nickName.ToString());
+//         });
+
+//         // Start a new timer to avoid grenade spamming
+//         grenadeFireDelay = TickTimer.CreateFromSeconds(Runner, 1.0f);
+//     }
+// }
+
+
     void FireGrenade(Vector3 aimForwardVector)
-{
-    // Проверка параметра
-    if (aimForwardVector == null)
     {
-        Debug.LogError("aimForwardVector is null.");
-        return;
-    }
-
-    // Проверка других объектов, которые могут быть null
-    if (grenadePrefab == null)
-    {
-        Debug.LogError("grenadePrefab is null.");
-        return;
-    }
-
-    if (aimPoint == null)
-    {
-        Debug.LogError("aimPoint is null.");
-        return;
-    }
-
-    if (Object.InputAuthority == null)
-    {
-        Debug.LogError("Object.InputAuthority is null.");
-        return;
-    }
-
-    if (networkPlayer == null)
-    {
-        Debug.LogError("networkPlayer is null.");
-        return;
-    }
-
-    if (Runner == null)
-    {
-        Debug.LogError("Runner is null.");
-        return;
-    }
-
-    // Check that we have not recently fired a grenade.
-    if (grenadeFireDelay.ExpiredOrNotRunning(Runner))
-    {
-        Runner.Spawn(grenadePrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedGrenade) =>
+        //Check that we have not recently fired a grenade. 
+        if (grenadeFireDelay.ExpiredOrNotRunning(Runner))
         {
-            if (spawnedGrenade == null)
+            Runner.Spawn(grenadePrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedGrenade) =>
             {
-                Debug.LogError("spawnedGrenade is null.");
-                return;
-            }
+                spawnedGrenade.GetComponent<GrenadeHandler>().Throw(aimForwardVector * 15, Object.InputAuthority, networkPlayer.nickName.ToString());
+            });
 
-            var grenadeHandler = spawnedGrenade.GetComponent<GrenadeHandler>();
-            if (grenadeHandler == null)
-            {
-                Debug.LogError("GrenadeHandler component is missing on spawnedGrenade.");
-                return;
-            }
-
-            grenadeHandler.Throw(aimForwardVector * 15, Object.InputAuthority, networkPlayer.nickName.ToString());
-        });
-
-        // Start a new timer to avoid grenade spamming
-        grenadeFireDelay = TickTimer.CreateFromSeconds(Runner, 1.0f);
+            //Start a new timer to avoid grenade spamming
+            grenadeFireDelay = TickTimer.CreateFromSeconds(Runner, 1.0f);
+        }
     }
-}
-
-
-    // void FireGrenade(Vector3 aimForwardVector)
-    // {
-    //     //Check that we have not recently fired a grenade. 
-    //     if (grenadeFireDelay.ExpiredOrNotRunning(Runner))
-    //     {
-    //         Runner.Spawn(grenadePrefab, aimPoint.position + aimForwardVector * 1.5f, Quaternion.LookRotation(aimForwardVector), Object.InputAuthority, (runner, spawnedGrenade) =>
-    //         {
-    //             spawnedGrenade.GetComponent<GrenadeHandler>().Throw(aimForwardVector * 15, Object.InputAuthority, networkPlayer.nickName.ToString());
-    //         });
-
-    //         //Start a new timer to avoid grenade spamming
-    //         grenadeFireDelay = TickTimer.CreateFromSeconds(Runner, 1.0f);
-    //     }
-    // }
 
     void FireRocket(Vector3 aimForwardVector, Vector3 cameraPosition)
     {
