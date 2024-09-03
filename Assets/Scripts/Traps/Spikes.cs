@@ -24,6 +24,15 @@ public class Spikes : NetworkBehaviour
     [Networked]
     private spikeState currentState { get; set; }
 
+    [Networked]
+    private materialState currentMat { get; set; }
+    public enum materialState
+    {
+        defaultMaterial,
+        activatedMaterial,
+        damageMaterial,
+        deactivatedMaterial
+    }
 
     private Renderer trapRenderer;
     ChangeDetector changeDetector;
@@ -61,12 +70,14 @@ public class Spikes : NetworkBehaviour
         if (currentState == spikeState.isRecharging)
         {
             if (damageTickTimer.Expired(Runner))
-                trapRenderer.material = deactivatedMaterial;
+                currentMat = materialState.deactivatedMaterial;
+
             if (rechargeTickTimer.Expired(Runner))
             {
                 RechargeTrap();
             }
         }
+
     }
 
     public override void Render()
@@ -81,6 +92,29 @@ public class Spikes : NetworkBehaviour
                     Debug.Log("current buffer: " + currentBuffer);
                     currentState = currentEnum;
                     break;
+                case nameof(currentMat):
+                    var materialReader = GetPropertyReader<materialState>(nameof(currentMat));
+                    var (previousMaterial, currentMaterial) = materialReader.Read(previousBuffer, currentBuffer);
+                    this.currentMat = currentMaterial;
+                    if (trapRenderer != null)
+                    {
+                        switch (this.currentMat)
+                        {
+                            case 0:
+                                trapRenderer.material = defaultMaterial;
+                                break;
+                            case (materialState)1:
+                                trapRenderer.material = activatedMaterial;
+                                break;
+                            case (materialState)2:
+                                trapRenderer.material = damageMaterial;
+                                break;
+                            case (materialState)3:
+                                trapRenderer.material = deactivatedMaterial;
+                                break;
+                        }
+                    }
+                    break;
             }
         }
     }
@@ -90,7 +124,7 @@ public class Spikes : NetworkBehaviour
         if (currentState != spikeState.isActivated && currentState != spikeState.isRecharging && other.CompareTag("Player"))
         {
             currentState = spikeState.isActivated;
-            trapRenderer.material = activatedMaterial;
+            currentMat = materialState.activatedMaterial;
             activationTickTimer = TickTimer.CreateFromSeconds(Runner, 1);
         }
     }
@@ -98,7 +132,7 @@ public class Spikes : NetworkBehaviour
     void ActivateTrap()
     {
         currentState = spikeState.isRecharging;
-        trapRenderer.material = damageMaterial;
+        currentMat = materialState.damageMaterial;
 
         Collider[] colliders = Physics.OverlapBox(transform.position, transform.localScale / 2, Quaternion.identity);
         foreach (var collider in colliders)
@@ -119,7 +153,7 @@ public class Spikes : NetworkBehaviour
     void RechargeTrap()
     {
         currentState = spikeState.isWaiting;
-        trapRenderer.material = defaultMaterial;
+        currentMat = materialState.defaultMaterial;
     }
 
 
@@ -127,6 +161,5 @@ public class Spikes : NetworkBehaviour
     {
         changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
         currentState = spikeState.isWaiting;
-
     }
 }
