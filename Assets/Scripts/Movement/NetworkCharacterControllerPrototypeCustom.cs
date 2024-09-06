@@ -1,6 +1,7 @@
 using System;
 using Fusion;
 using UnityEngine;
+using Fusion.Addons.KCC;
 
 [RequireComponent(typeof(CharacterController))]
 [DisallowMultipleComponent]
@@ -15,6 +16,9 @@ public class NetworkCharacterControllerPrototypeCustom : NetworkBehaviour
   public float maxSpeed      = 2.0f;
   public float rotationSpeed = 15.0f;
   public float viewUpDownRotationSpeed = 50.0f;
+  private KCC kCC;
+  private float maxPitch = 85f;
+  private Vector3 jumpImpulseKCC = new(0f,10.0f, 0f);
 
   [Networked]
   [HideInInspector]
@@ -106,6 +110,18 @@ public class NetworkCharacterControllerPrototypeCustom : NetworkBehaviour
     Velocity   = (transform.position - previousPos);// * Runner.Simulation.Config.TickRate;
     IsGrounded = Controller.isGrounded;
   }
+
+
+    public void CheckJump(NetworkInputData inputData)
+    {
+      if (inputData.isJumpPressed && kCC.FixedData.IsGrounded)
+       kCC.Jump(jumpImpulseKCC);
+    }
+
+    // private void SetInputDirection(NetworkInputData inputData)
+    // {
+    //   Vector3 worldDirection = kCC.FixedData.TransformRotation * inputData.Direc
+    // }
 
     public void Rotate(float rotationY)
     {

@@ -19,12 +19,21 @@ public class CharacterMovementHandler : NetworkBehaviour
     NetworkInGameMessages networkInGameMessages;
     NetworkPlayer networkPlayer;
 
+
+    [SerializeField] private float doubleJumpMultiplier = 200.75f;
+    [SerializeField] private float doubleJumpCD = 5f;
+
+    public float DoubleJumpCDFactor => (DoubleJumpCD.RemainingTime(Runner) ?? 0f) / doubleJumpCD;
+
+    [Networked] private TickTimer DoubleJumpCD { get; set; }
+
     private void Awake()
     {
         networkCharacterController = GetComponent<NetworkCharacterController>();
         hpHandler = GetComponent<HPHandler>();
         networkInGameMessages = GetComponent<NetworkInGameMessages>();
         networkPlayer = GetComponent<NetworkPlayer>();
+
     }
 
     // Start is called before the first frame update
@@ -68,9 +77,20 @@ public class CharacterMovementHandler : NetworkBehaviour
 
             networkCharacterController.Move(moveDirection);
 
+
             //Jump
             if (networkInputData.isJumpPressed)
+            {
                 networkCharacterController.Jump();
+            }
+            if (networkInputData.isJumpPressed && !networkCharacterController.Grounded
+            && DoubleJumpCD.ExpiredOrNotRunning(Runner)
+            )
+            {
+                Debug.Log("Double jump pressed: " + doubleJumpCD);
+                networkCharacterController.Jump(true, overrideImpulse: networkCharacterController.jumpImpulse * doubleJumpMultiplier);
+                DoubleJumpCD = TickTimer.CreateFromSeconds(Runner, doubleJumpCD);
+            }
 
             Vector2 walkVector = new Vector2(networkCharacterController.Velocity.x, networkCharacterController.Velocity.z);
             walkVector.Normalize();
@@ -122,9 +142,16 @@ public class CharacterMovementHandler : NetworkBehaviour
         networkCharacterController.enabled = isEnabled;
     }
 
+    public void ResetCooldowns()
+    {
+        DoubleJumpCD = TickTimer.None;
+    }
     public override void Spawned()
     {
         if (Object.HasStateAuthority)
+        {
             networkCharacterController.Teleport(Utils.GetRandomSpawnPoint());
+            this.ResetCooldowns();
+        }
     }
 }
