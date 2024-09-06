@@ -1,4 +1,0 @@
-repository "ultrahub@Intensio_T@cloud"
-  path "/"
-    br "/main"
-    co "/main"
