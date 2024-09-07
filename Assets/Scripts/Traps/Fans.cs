@@ -1,23 +1,41 @@
 using System.Collections;
 using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 
-public class Fans : MonoBehaviour
+public class Fans : NetworkBehaviour
 {
     [SerializeField]
-    public float pushForce = 10f;
+    public float pushForce = 100f;
     public Transform fanDirection;
 
+    NetworkCharacterController networkCharacterController;
+
+    private void Awake()
+    {
+        networkCharacterController = GetComponentInParent<NetworkCharacterController>();
+    }
     void OnTriggerStay(Collider other)
     {
         Debug.Log(other.attachedRigidbody + "Collider trigger");
-        Rigidbody rb = other.GetComponent<Rigidbody>();
-        if (rb != null)
+
+
+        networkCharacterController = other.GetComponentInParent<NetworkCharacterController>();
+        Debug.Log(networkCharacterController);
+
+        if (networkCharacterController != null)
         {
-            Debug.Log(rb.name + "- Rigid body");
+            Debug.Log(networkCharacterController.name + " - NetworkCharacterController");
             // Применяем силу в направлении вентилятора
             Vector3 forceDirection = fanDirection.forward;
-            rb.AddForce(forceDirection * pushForce, ForceMode.Force);
+            Debug.DrawLine(transform.up, forceDirection, Color.red);
+            Vector3 moveDirection = forceDirection;
+
+            // Нормализуем направление движения, если это необходимо
+            moveDirection.Normalize();
+
+            // Передаем направление движения в networkCharacterController
+            networkCharacterController.Move(moveDirection, pushForce);
         }
     }
 }

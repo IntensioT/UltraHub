@@ -95,7 +95,39 @@ namespace Fusion {
       if (direction == default) {
         horizontalVel = Vector3.Lerp(horizontalVel, default, braking * deltaTime);
       } else {
-        horizontalVel      = Vector3.ClampMagnitude(horizontalVel + direction * acceleration * deltaTime, maxSpeed);
+        horizontalVel      = Vector3.ClampMagnitude(horizontalVel + direction * acceleration * deltaTime , maxSpeed);
+      }
+
+      moveVelocity.x = horizontalVel.x;
+      moveVelocity.z = horizontalVel.z;
+
+      _controller.Move(moveVelocity * deltaTime);
+
+      Data.Velocity = (transform.position - previousPos) * Runner.TickRate;
+      Data.Grounded = _controller.isGrounded;
+    }
+
+    public void Move(Vector3 direction, float confrontationPower) {
+      var deltaTime    = Runner.DeltaTime;
+      var previousPos  = transform.position;
+      var moveVelocity = Data.Velocity;
+
+      direction = direction.normalized;
+
+      if (Data.Grounded && moveVelocity.y < 0) {
+        moveVelocity.y = 0f;
+      }
+
+      moveVelocity.y += gravity * Runner.DeltaTime;
+
+      var horizontalVel = default(Vector3);
+      horizontalVel.x = moveVelocity.x;
+      horizontalVel.z = moveVelocity.z;
+
+      if (direction == default) {
+        horizontalVel = Vector3.Lerp(horizontalVel, default, braking * deltaTime);
+      } else {
+        horizontalVel      = Vector3.ClampMagnitude(horizontalVel + direction * acceleration * deltaTime * confrontationPower, maxSpeed);
       }
 
       moveVelocity.x = horizontalVel.x;
