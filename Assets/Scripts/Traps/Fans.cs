@@ -23,6 +23,8 @@ public class Fans : NetworkBehaviour
         networkCharacterController = other.GetComponentInParent<NetworkCharacterController>();
         Debug.Log(networkCharacterController);
 
+        
+
         if (networkCharacterController != null)
         {
             Debug.Log(networkCharacterController.name + " - NetworkCharacterController");
