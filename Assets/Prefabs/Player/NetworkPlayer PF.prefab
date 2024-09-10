@@ -1254,7 +1254,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterAnimator: {fileID: 4332517196623806722}
   doubleJumpMultiplier: 1.5
-  doubleJumpCD: 5
+  doubleJumpCD: 3
 --- !u!114 &8954754819099828064
 MonoBehaviour:
   m_ObjectHideFlags: 0

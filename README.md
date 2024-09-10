@@ -3,10 +3,47 @@
 ## Overview
 
 UltraHub is a 3D multiplayer game developed using Unity. The game allows players to join or create servers, customize their characters, and interact with other players in a dynamic and engaging environment.
+The character must move from the starting point to the finish line, overcoming obstacles on the field.
+
+### Field
+
+- Several paths branch out from the starting point, intertwined with each other.
+- All paths converge into one at the finish line.
+- Some blocks on the path are traps that hinder the player from reaching the finish.
+
+### Traps
+
+1. **Damage Block**:
+   - Activates when the player steps on it (glows orange).
+   - Deals damage to everyone standing on the block after 1 second (flashes red).
+   - Recharges over 5 seconds.
+
+2. **Wind Block**:
+   - Wind pushes the character with a certain force.
+   - Only affects the character while they are on the block.
+   - Wind direction changes randomly every 2 seconds.
+   - Wind blows strictly horizontally.
+
+### Game End
+
+- **Victory**:
+  - The player crosses the finish line.
+  - A "Victory!" message and a restart button are displayed.
+  - The level completion time is shown.
+
+- **Defeat**:
+  - The player falls off the path into the abyss or runs out of health.
+  - A "Defeat!" message and a restart button are displayed.
+
+### Additional
+
+- The player's health is always displayed on the screen.
+- The level completion time is calculated from the moment the starting line is crossed.
+- In the lower-left corner, you will see information about player kills and deaths in the game world.
 
 ## Functionality Design
 
-When creating a 3D graphic application, it is crucial to define the tasks and goals clearly and to develop efficient algorithms. The following methods are used in the program:
+The following methods are used in the program:
 
 - **Player Movement in Local Network:**
   - Players can move within the game environment, and their movements are synchronized with the game server.
@@ -20,22 +57,18 @@ When creating a 3D graphic application, it is crucial to define the tasks and go
 - **Pseudo-Random Player Spawning:**
   - Players spawn at pseudo-random locations on the map and respawn after death.
 
-- **Player Tracking:**
-  - The current number of players and their characteristics are tracked.
-
-### Pseudo-Random Player Spawning
-
-An algorithm is used to spawn players at different locations on the map and to respawn them after death.
-
-### Player Movement
-
-Player movement is processed locally and then synchronized with the server.
-
-### Player Interactions
-
-Player interactions are processed locally and then synchronized with the server.
-
 ## User Manual
+### Player Controls
+
+- **W Key:** Moves the character forward on the map, animating the movement.
+- **S Key:** Moves the character backward on the map, animating the movement.
+- **A Key:** Moves the character to the left on the map, animating the movement.
+- **D Key:** Moves the character to the right on the map, animating the movement.
+- **V Key:** Changes third/first person view.
+- **Left mouse button** Fire button.
+- **Right mouse button** Rocket fire button.
+- **R key** Grenade throw button.
+- **Space bar key** Jump and double-jump button.
 
 ### Controlling the Game
 
@@ -57,13 +90,3 @@ After joining or creating a lobby, you can customize the appearance of your char
 
 ![image](https://github.com/user-attachments/assets/4c5de0a6-d4bd-425f-a0c4-93b74d472fd6)
 
-### Player Controls
-
-- **W Key:** Moves the character forward on the map, animating the movement.
-- **S Key:** Moves the character backward on the map, animating the movement.
-- **A Key:** Moves the character to the left on the map, animating the movement.
-- **D Key:** Moves the character to the right on the map, animating the movement.
-
-### In-Game Information
-
-In the lower-left corner, you will see information about player kills and deaths in the game world.
