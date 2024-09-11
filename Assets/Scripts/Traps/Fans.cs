@@ -19,12 +19,12 @@ public class Fans : NetworkBehaviour
     void OnTriggerStay(Collider other)
     {
         if (!isActiveAndEnabled) return;
+        if (!other.CompareTag("Player")) return;
 
         Debug.Log(other.attachedRigidbody + "Collider trigger");
 
 
         networkCharacterController = other.GetComponentInParent<NetworkCharacterController>();
-        Debug.Log(networkCharacterController);
 
         if (networkCharacterController != null)
         {

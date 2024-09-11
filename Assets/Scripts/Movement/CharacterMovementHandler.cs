@@ -137,6 +137,22 @@ public class CharacterMovementHandler : NetworkBehaviour
         isRespawnRequested = false;
     }
 
+    void CheckFinishEndGame()
+    {
+        if (transform.position.y < -12)
+        {
+            if (Object.HasStateAuthority)
+            {
+                Debug.Log($"{Time.time} Respawn due to fall outside of map at position {transform.position}");
+
+                networkInGameMessages.SendInGameRPCMessage(networkPlayer.nickName.ToString(), "fell off the world");
+
+                Respawn();
+            }
+
+        }
+    }
+
     public void SetCharacterControllerEnabled(bool isEnabled)
     {
         networkCharacterController.enabled = isEnabled;

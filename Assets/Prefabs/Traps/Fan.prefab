@@ -265,7 +265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4700cda80e4e03f419639d5f1fc6ad00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pushForce: 2.5
+  pushForce: 3
   fanDirection: {fileID: 79383377208436441}
   fanAnimator: {fileID: 0}
 --- !u!114 &1148247951246284813

@@ -22,7 +22,6 @@ public class NetworkRunnerHandler : MonoBehaviour
         //If we already have a network runner in the scene then we should not create another one but rahter use the existing one
         if (networkRunnerInScene != null)
             networkRunner = networkRunnerInScene;
-
     }
 
     // Start is called before the first frame update
@@ -92,11 +91,6 @@ public class NetworkRunnerHandler : MonoBehaviour
 
         return runner.StartGame(new StartGameArgs
         {
-            //GameMode = gameMode,  // ignored, Game Mode comes with the HostMigrationToken
-            //Address = address,
-            //Scene = scene,
-            //SessionName = "TestRoom",
-            //Initialized = initialized,
             SceneManager = sceneManager,
             HostMigrationToken = hostMigrationToken, // contains all necessary info to restart the Runner
             HostMigrationResume = HostMigrationResume, // this will be invoked to resume the simulation
@@ -179,7 +173,7 @@ public class NetworkRunnerHandler : MonoBehaviour
     {
         Debug.Log($"Create session {sessionName} scene {sceneName} build Index {SceneUtility.GetBuildIndexByScenePath($"scenes/{sceneName}")}");
 
-        //Join existing game as a client
+        //Join existing game as a host
         var clientTask = InitializeNetworkRunner(networkRunner, GameMode.Host, sessionName, GameManager.instance.GetConnectionToken(), NetAddress.Any(), SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"scenes/{sceneName}")), null);
 
     }

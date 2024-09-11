@@ -14,6 +14,7 @@ public class FanController : NetworkBehaviour
 
     void Update()
     {
+        if (Object == null) return;
         if (Object.HasStateAuthority)
         {
             timer += Time.deltaTime;
@@ -31,7 +32,10 @@ public class FanController : NetworkBehaviour
     {
         leftFan.enabled = leftFanActive;
         leftFan.SetAnimationActive(leftFanActive);
+        leftFan.GetComponent<Collider> ().enabled = leftFanActive;
+        
         rightFan.enabled = !leftFanActive;
         rightFan.SetAnimationActive(!leftFanActive);
+        rightFan.GetComponent<Collider> ().enabled = !leftFanActive;
     }
 }

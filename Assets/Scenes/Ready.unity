@@ -736,6 +736,10 @@ PrefabInstance:
       value: 133633
       objectReference: {fileID: 0}
     - target: {fileID: 2188957561650592609, guid: 913e1b08620d21841b5a2c4a29553dd7, type: 3}
+      propertyPath: SortKey
+      value: 2060210127
+      objectReference: {fileID: 0}
+    - target: {fileID: 2188957561650592609, guid: 913e1b08620d21841b5a2c4a29553dd7, type: 3}
       propertyPath: NetworkGuid.RawGuidValue.Array.data[0]
       value: 7873076972199754370
       objectReference: {fileID: 0}
@@ -2033,18 +2037,12 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SortKey: 1545428410
   ObjectInterest: 1
-  DefaultInterestGroups: []
-  DestroyWhenStateAuthorityLeaves: 0
-  AllowStateAuthorityOverride: 1
-  AoiPositionSource: {fileID: 0}
   Flags: 2561
-  NetworkGuid:
-    RawGuidValue: a7fc2523df844de68cc78c06d6a6dec4
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 5306632466356233888}
-  SimulationBehaviours: []
 --- !u!114 &5306632466356233888
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2057,7 +2055,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adb6092cf384a984bad0c7daeec1b0a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _interpolationDataSource: 0
   buttonReadyText: {fileID: 5306632466800879960}
   countDownText: {fileID: 5306632466641543703}
 --- !u!1 &5306632466641543700
