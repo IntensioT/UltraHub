@@ -61,6 +61,9 @@ public class CharacterInputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G))
             isGrenadeFireButtonPressed = true;
 
+        if (Input.GetKey(KeyCode.F2))
+            Cursor.visible = !Cursor.visible;
+
         if (Input.GetKeyDown(KeyCode.V))
         {
             //switch var on my local version of networkPlayer

@@ -107,6 +107,7 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
             playerNickNameTM.gameObject.SetActive(false);
 
             Debug.Log("Spawned local player");
+            Utils.StartTimer();
         }
         else
         {
@@ -125,6 +126,7 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 
         //Make it easier to tell which player is which.
         transform.name = $"P_{Object.Id}";
+        Debug.Log("Player" + Object.Id + " : " + Object.Name + "proceed");
     }
 
     public void PlayerLeft(PlayerRef player)

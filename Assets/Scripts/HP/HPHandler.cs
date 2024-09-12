@@ -34,6 +34,8 @@ public class HPHandler : NetworkBehaviour
     NetworkInGameMessages networkInGameMessages;
     NetworkPlayer networkPlayer;
 
+    public PlayerStatusUIHandler playerStatusUIHandler;
+
     private void Awake()
     {
         characterMovementHandler = GetComponent<CharacterMovementHandler>();
@@ -54,6 +56,7 @@ public class HPHandler : NetworkBehaviour
         ResetMeshRenderers();
 
         isInitialized = true;
+        playerStatusUIHandler.healthPoints = "5";
     }
 
     public override void Render()
@@ -106,6 +109,8 @@ public class HPHandler : NetworkBehaviour
 
         if (Object.HasInputAuthority && !isDead)
             uiOnHitImage.color = new Color(0, 0, 0, 0);
+
+        playerStatusUIHandler.healthPoints = HP.ToString();
     }
 
     IEnumerator ServerReviveCO()
@@ -195,6 +200,7 @@ public class HPHandler : NetworkBehaviour
     {
         //Reset variables
         HP = startingHP;
+        playerStatusUIHandler.healthPoints = "5";
         isDead = false;
     }
 

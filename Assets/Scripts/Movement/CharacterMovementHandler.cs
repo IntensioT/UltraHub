@@ -41,6 +41,12 @@ public class CharacterMovementHandler : NetworkBehaviour
     {
     }
 
+    void Update()
+    {
+        float cdTime = DoubleJumpCD.RemainingTime(Runner) ?? 0;
+        hpHandler.playerStatusUIHandler.coolDownDoubleJump = cdTime.ToString("F2");
+    }
+
     public override void FixedUpdateNetwork()
     {
         if (SceneManager.GetActiveScene().name == "Ready")
@@ -103,7 +109,6 @@ public class CharacterMovementHandler : NetworkBehaviour
             //Check if we've fallen off the world.
             CheckFallRespawn();
         }
-
     }
 
     void CheckFallRespawn()

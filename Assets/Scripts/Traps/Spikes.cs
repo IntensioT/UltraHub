@@ -89,7 +89,6 @@ public class Spikes : NetworkBehaviour
                 case nameof(currentState):
                     var enumReader = GetPropertyReader<spikeState>(nameof(currentState));
                     var (previousEnum, currentEnum) = enumReader.Read(previousBuffer, currentBuffer);
-                    Debug.Log("current buffer: " + currentBuffer);
                     currentState = currentEnum;
                     break;
                 case nameof(currentMat):

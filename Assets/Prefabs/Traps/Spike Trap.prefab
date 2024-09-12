@@ -226,7 +226,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activationDelay: 1
   rechargeTime: 5
-  damage: 5
+  damage: 3
   trapName: Spike trap
   defaultMaterial: {fileID: 2100000, guid: ad051f284d94f214daf44f0e096bc1bb, type: 2}
   activatedMaterial: {fileID: 2100000, guid: 36d740416d72a764e9d09dfe88ed0571, type: 2}

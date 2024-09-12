@@ -17,7 +17,6 @@ public class NetworkCharacterControllerPrototypeCustom : NetworkBehaviour
   public float rotationSpeed = 15.0f;
   public float viewUpDownRotationSpeed = 50.0f;
   private KCC kCC;
-  private float maxPitch = 85f;
   private Vector3 jumpImpulseKCC = new(0f,10.0f, 0f);
 
   [Networked]

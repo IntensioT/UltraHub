@@ -16,14 +16,16 @@ public class Finish : NetworkBehaviour
         networkRunnerInParent = other.GetComponentInParent<NetworkRunner>();
         networkRunner = other.GetComponent<NetworkRunner>();
         Debug.Log("Finish collision: Network Runner this : " + this.Runner);
-        // Завершить текущую сессию
-        OnWinnerEndGame(Runner);
 
-        // Включить курсор
+        // OnWinnerEndGame(Runner);
+
+        // Отображаем время на экране
+        Debug.Log("Time spent to finish: " + Utils.GetGameTime().ToString("F2") + " seconds");
+
         EnableCursor();
 
         // Перезагрузить сцену
-        SceneManager.LoadScene("MainMenu"); // Замените на имя вашей сцены выбора сессии
+        // SceneManager.LoadScene("MainMenu");
     }
 
     private void EnableCursor()
