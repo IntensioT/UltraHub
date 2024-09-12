@@ -62,12 +62,16 @@ public class CharacterInputHandler : MonoBehaviour
             isGrenadeFireButtonPressed = true;
 
         if (Input.GetKey(KeyCode.F2))
+        {
             Cursor.visible = !Cursor.visible;
+            Cursor.lockState = CursorLockMode.None;
+        }
+
 
         if (Input.GetKeyDown(KeyCode.V))
         {
             //switch var on my local version of networkPlayer
-            NetworkPlayer.Local.isThirdPersonCamera = !NetworkPlayer.Local.isThirdPersonCamera; 
+            NetworkPlayer.Local.isThirdPersonCamera = !NetworkPlayer.Local.isThirdPersonCamera;
 
             //Tell the state authority which camera moode is using 
             NetworkPlayer.Local.RPC_SetCameraMode(NetworkPlayer.Local.isThirdPersonCamera);

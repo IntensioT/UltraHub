@@ -25,7 +25,7 @@ public class PlayerStatusUIHandler : MonoBehaviour
 
         healthPointsTMP.text = healthPoints + " / 5 hp";
 
-        if (coolDownDoubleJump == "0.00")  coolDownDoubleJumpTMP.text = "ready";
+        if (coolDownDoubleJump == "0.00")  coolDownDoubleJumpTMP.text = "double jump is ready";
         else coolDownDoubleJumpTMP.text = coolDownDoubleJump + " / 3 sec";
     }
 }

@@ -3,24 +3,19 @@ using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Finish : NetworkBehaviour
 {
-    NetworkRunner networkRunnerInParent;
-    NetworkRunner networkRunner;
 
+    [SerializeField] GameObject playerEndGameMenu;
     void OnTriggerStay(Collider other)
     {
         if (!other.CompareTag("Player")) return;
 
-        networkRunnerInParent = other.GetComponentInParent<NetworkRunner>();
-        networkRunner = other.GetComponent<NetworkRunner>();
         Debug.Log("Finish collision: Network Runner this : " + this.Runner);
 
-        // OnWinnerEndGame(Runner);
-
-        // Отображаем время на экране
-        Debug.Log("Time spent to finish: " + Utils.GetGameTime().ToString("F2") + " seconds");
+        other.GetComponent<NetworkInGameMessages>().SendEndGameRPCMessage(other.GetComponent<NetworkPlayer>().nickName.ToString());
 
         EnableCursor();
 
@@ -33,15 +28,14 @@ public class Finish : NetworkBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
-    
 
-    public async void OnWinnerEndGame(NetworkRunner runner) 
+
+    public async void OnWinnerEndGame(NetworkRunner runner)
     {
         Debug.Log("Winner end game");
 
         // Shut down the current runner
         await runner.Shutdown(shutdownReason: ShutdownReason.HostMigration);
-
     }
 
 }
